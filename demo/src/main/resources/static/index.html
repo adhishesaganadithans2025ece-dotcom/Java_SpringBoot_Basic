@@ -1,0 +1,164 @@
+<html>
+<head>
+    <title>Bank Management System</title>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #727272;
+                margin: 0;
+                padding: 30px;
+            }
+
+            .container {
+                width: 80%;
+                margin: auto;
+            }
+
+            h1 {
+                text-align: center;
+                color: #333;
+            }
+            .card{
+                background: white;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+
+            }
+            input {
+                padding: 10px;
+                margin: 5px;
+                width: 200px;
+            }
+
+            button {
+                padding: 10px 15px;
+                margin: 5px;
+                border:none;
+                border-radius: 5px;
+                cursor:pointer;
+            }
+        </style>
+</head>
+<body>
+<div class="container">
+    <h1>Bank Management System</h1>
+    <div class="card">
+        <h2>Create & Update Account</h2>
+        <input type="number" id="id" placeholder="Amount Id">
+        <input type="text" id="name" placeholder="Account holder name">
+        <input type="number" id="amount" placeholder="Amount">
+        <br>
+        <button class="create" onclick="createAccount()"> Create Account</button>
+        <button class="update" onclick="updateAccount()">Update Account</button>
+        <button onclick="clearForm()">Clear</button>
+    </div>
+    <div class="card">
+        <h2>Search Account</h2>
+        <input type="number" id="searchId" placeholder="Enter Account Id">
+        <button class="get" onclick="getAccount()">Get Account</button>
+        <div id="singleAccount"></div>
+    </div>
+    <div class="card">
+        <h2>Delete Account</h2>
+        <input type="number" id="deleteId" placeholder="Enter Account Id">
+        <button class="delete" onclick="deleteAccount()">Delete Account</button>
+    </div>
+
+    <div id="message"></div>
+</div>
+
+<script>
+    const API_URL="/api/bank";
+    function createAccount() {
+        const account = {
+            id: document.getElementById("id").value,
+            name: document.getElementById("name").value,
+            amount: document.getElementById("amount").value
+        }
+        fetch(API_URL + "/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(account)
+        }).then(response => response.json()).then(data => {
+            showMessage("Account created successfully!");
+            clearForm();
+        })
+            .catch(error => {
+                showMessage("Error creating account!");
+                console.error(error);
+            })
+    }
+    function clearForm(){
+        document.getElementById("id").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("amount").value = "";
+
+    }
+    function showMessage(message){
+        document.getElementById("message").innerText=message;
+    }
+    function updateAccount() {
+        const id = document.getElementById("id").value;
+        const account = {
+            id: document.getElementById("id").value,
+            name: document.getElementById("name").value,
+            amount: document.getElementById("amount").value
+        }
+        fetch(API_URL + "/update/"+id, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(account)
+        }).then(response => response.json()).then(data => {
+            showMessage("Account updated successfully!");
+            clearForm();
+        })
+            .catch(error => {
+                showMessage("Error updated account!");
+                console.error(error);
+            })
+    }
+    function getAccount() {
+        const id = document.getElementById("searchId").value;
+        fetch(API_URL + "/getAccount/" + id)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Account not found");
+                }
+                return response.json();
+            })
+            .then(account => {
+                document.getElementById("singleAccount").innerHTML =
+                    `<h3>Account Details</h3>
+                <p><b>Id:</b> ${account.id}</p>
+                <p><b>Name:</b> ${account.name}</p>
+                <p><b>Amount:</b> ${account.amount}</p>`;
+            })
+            .catch(error => {
+                showMessage("Account Not Found");
+                console.error(error);
+            });
+    }
+    function deleteAccount() {
+        const id = document.getElementById("deleteId").value;
+        if(!confirm("Are you sure you want to delete this account?")){
+            return;
+        }
+        fetch(API_URL + "/delete/" + id, {
+            method: "DELETE"
+        }).then(response => {
+            showMessage("Account deleted successfully!");
+        }).catch(error => {
+            showMessage("Error deleting account");
+            console.error(error);
+        })
+    }
+</script>
+</body>
+</html>

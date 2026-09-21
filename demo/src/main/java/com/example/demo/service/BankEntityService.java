@@ -18,5 +18,14 @@ public class BankEntityService {
     public List<BankEntity> getAllAccounts(){
         return bankAccountRepository.findAll();
     }
+    public BankEntity getAccount(int id){
+        return bankAccountRepository.findById(id).orElse(null);
+    }
+    public BankEntity updateAccount(BankEntity be){
+        return bankAccountRepository.save(be);
+    }
+    public void deleteAccount(int id){
+        bankAccountRepository.deleteById(id);
+    }
 
 }
